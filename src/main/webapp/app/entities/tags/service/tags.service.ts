@@ -17,6 +17,7 @@ export class TagsService {
   constructor(protected http: HttpClient, protected applicationConfigService: ApplicationConfigService) {}
 
   create(tags: ITags): Observable<EntityResponseType> {
+    console.log('Hello there i am here', tags);
     return this.http.post<ITags>(this.resourceUrl, tags, { observe: 'response' });
   }
 

@@ -21,11 +21,14 @@ import { EventLogBookService } from 'app/entities/event-log-book/service/event-l
 })
 export class EventLogUpdateComponent implements OnInit {
   isSaving = false;
-
+  skillsSet: any;
+  skills: string[] = [];
   usersSharedCollection: IUser[] = [];
   tagsSharedCollection: ITags[] = [];
   eventLogBooksSharedCollection: IEventLogBook[] = [];
-
+  data!: ITags;
+  tagValue: ITags[] = [];
+  isInsert?: boolean;
   editForm = this.fb.group({
     id: [],
     uuid: [],
@@ -48,6 +51,7 @@ export class EventLogUpdateComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.isInsert = true;
     this.activatedRoute.data.subscribe(({ eventLog }) => {
       this.updateForm(eventLog);
 
@@ -60,13 +64,25 @@ export class EventLogUpdateComponent implements OnInit {
   }
 
   save(): void {
-    this.isSaving = true;
     const eventLog = this.createFromForm();
+    console.log('aaaa');
+    console.log(eventLog);
+    // this.saveTag();
+
     if (eventLog.id !== undefined) {
       this.subscribeToSaveResponse(this.eventLogService.update(eventLog));
     } else {
       this.subscribeToSaveResponse(this.eventLogService.create(eventLog));
     }
+    // this.skills=[];
+  }
+
+  saveTag(): void {
+    this.tagValue.forEach(value => {
+      this.tagsService.create(value).subscribe(response => {
+        console.log(response);
+      });
+    });
   }
 
   trackUserById(index: number, item: IUser): number {
@@ -75,6 +91,10 @@ export class EventLogUpdateComponent implements OnInit {
 
   trackTagsById(index: number, item: ITags): number {
     return item.id!;
+  }
+
+  trackTagsByName(index: any, item: ITags): any {
+    return item.name!;
   }
 
   trackEventLogBookById(index: number, item: IEventLogBook): number {
@@ -90,6 +110,23 @@ export class EventLogUpdateComponent implements OnInit {
       }
     }
     return option;
+  }
+
+  onSkillsSetKeydown(): any {
+    if (this.skillsSet === '' || this.skillsSet === null) {
+      return;
+    }
+    this.skills.push(this.skillsSet);
+    this.data = {
+      name: this.skillsSet,
+    };
+    this.tagValue.push(this.data);
+    this.skillsSet = '';
+  }
+
+  dropSkill(index: any): any {
+    this.skills.splice(index, 1);
+    this.tagValue.splice(index, 1);
   }
 
   protected subscribeToSaveResponse(result: Observable<HttpResponse<IEventLog>>): void {
@@ -166,7 +203,7 @@ export class EventLogUpdateComponent implements OnInit {
       createdDate: this.editForm.get(['createdDate'])!.value,
       updatedDate: this.editForm.get(['updatedDate'])!.value,
       user: this.editForm.get(['user'])!.value,
-      tags: this.editForm.get(['tags'])!.value,
+      tags: this.tagValue,
       eventLogBook: this.editForm.get(['eventLogBook'])!.value,
     };
   }

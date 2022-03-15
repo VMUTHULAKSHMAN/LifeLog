@@ -1,6 +1,6 @@
 <div class="row justify-content-center">
   <div class="col-8">
-    <form name="editForm" role="form" novalidate (ngSubmit)="save()" [formGroup]="editForm">
+    <form name="editForm" role="form" novalidate [formGroup]="editForm">
       <h2 id="jhi-event-log-heading" data-cy="EventLogCreateUpdateHeading" jhiTranslate="lifeLogApp.eventLog.home.createOrEditLabel">
         Create or edit a Event Log
       </h2>
@@ -85,15 +85,35 @@
 
         <div class="form-group">
           <label jhiTranslate="lifeLogApp.eventLog.tags" for="field_tags">Tags</label>
-          <select class="form-control" id="field_tags" data-cy="tags" multiple name="tags" formControlName="tags">
-            <option
-              [ngValue]="getSelectedTags(tagsOption, editForm.get('tags')!.value)"
-              *ngFor="let tagsOption of tagsSharedCollection; trackBy: trackTagsById"
-            >
-              {{ tagsOption.id }}
-            </option>
-          </select>
+          <div class="input-group">
+            <input
+              id="field_tags"
+              data-cy="tags"
+              type="text"
+              class="form-control"
+              multiple
+              name="tags"
+              formControlName="tags"
+              placeholder="Enter each Skills Set and hit 'Enter' Key."
+              [(ngModel)]="skillsSet"
+              (keydown.enter)="onSkillsSetKeydown()"
+            />
+          </div>
         </div>
+        <div *ngFor="let skill of skills; let i = index" class="roundedcorner" style="display: inline-block">
+          <button type="button" class="btn btn-outline-primary mr-2" (click)="dropSkill(i)">
+            {{ skill }}<span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+
+        <!-- <select class="form-control" id="field_tags" data-cy="tags" multiple name="tags" formControlName="tags">
+          <option
+            [ngValue]="getSelectedTags(tagsOption, editForm.get('tags')!.value)"
+            *ngFor="let tagsOption of tagsSharedCollection; trackBy: trackTagsByName"
+          >
+            {{ tagsOption.name }}
+          </option>
+        </select> -->
 
         <div class="form-group">
           <label class="form-control-label" jhiTranslate="lifeLogApp.eventLog.eventLogBook" for="field_eventLogBook">Event Log Book</label>
@@ -117,11 +137,12 @@
         </button>
 
         <button
-          type="submit"
+          type="button"
           id="save-entity"
           data-cy="entityCreateSaveButton"
-          [disabled]="editForm.invalid || isSaving"
+          [disabled]="editForm.invalid || !isInsert || skills.length == 0"
           class="btn btn-primary"
+          (click)="save()"
         >
           <fa-icon icon="save"></fa-icon>&nbsp;<span jhiTranslate="entity.action.save">Save</span>
         </button>

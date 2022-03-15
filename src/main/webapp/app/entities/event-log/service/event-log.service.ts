@@ -27,6 +27,7 @@ export class EventLogService {
   }
 
   update(eventLog: IEventLog): Observable<EntityResponseType> {
+    console.log(eventLog);
     const copy = this.convertDateFromClient(eventLog);
     return this.http
       .put<IEventLog>(`${this.resourceUrl}/${getEventLogIdentifier(eventLog) as number}`, copy, { observe: 'response' })
