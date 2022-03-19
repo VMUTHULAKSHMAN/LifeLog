@@ -21,6 +21,12 @@ import { Router } from '@angular/router';
   templateUrl: './event-log.component.html',
 })
 export class EventLogComponent implements OnInit, OnDestroy {
+  skillsSet: any;
+  skills: string[] = [];
+  tagsid: ITags[] = [];
+  data!: ITags;
+  tagValue: ITags[] = [];
+  isInsert?: boolean;
   eventLogs: IEventLog[] = [];
   isLoading = false;
   filterEventLogs = '';
@@ -74,6 +80,7 @@ export class EventLogComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    this.isInsert = true;
     this.loadAll();
     this.loadRelationshipsOptions();
   }
@@ -124,6 +131,8 @@ export class EventLogComponent implements OnInit, OnDestroy {
 
   onEdit(eventLog: IEventLog): void {
     this.eventLogRef = eventLog;
+    console.log('Event log', eventLog);
+    console.log('event log ref', this.eventLogRef);
     this.modalService.open(this.content);
   }
 
@@ -131,8 +140,9 @@ export class EventLogComponent implements OnInit, OnDestroy {
     this.isSaving = true;
 
     const eventLog = this.createFromForm(editForm.value);
-
+    eventLog.tags = this.tagsid;
     if (eventLog.id !== undefined) {
+      console.log('event Log submit', eventLog);
       this.subscribeToSaveResponse(this.eventLogService.update(eventLog));
     } else {
       this.subscribeToSaveResponse(this.eventLogService.create(eventLog));
@@ -172,6 +182,51 @@ export class EventLogComponent implements OnInit, OnDestroy {
         return arr;
       }
     });
+  }
+
+  // my changes in tags
+  fetchtag(skillsSet: string, tag: ITags): void {
+    let flag = 1;
+    this.tagsService.query().subscribe(response => {
+      if (response.body !== null) {
+        response.body.map(data => {
+          if (data.name === skillsSet) {
+            flag = 0;
+            this.tagsid.push({
+              id: data.id,
+            });
+          }
+        });
+      }
+      if (flag === 1) {
+        this.tagsService.create(tag).subscribe(responsedata => {
+          if (responsedata.body !== null) {
+            this.tagsid.push({
+              id: responsedata.body.id,
+            });
+          }
+        });
+      }
+    });
+  }
+
+  onSkillsSetKeydown(): any {
+    if (this.skillsSet === '' || this.skillsSet === null) {
+      return;
+    }
+    this.skills.push(this.skillsSet);
+    this.data = {
+      name: this.skillsSet,
+    };
+    this.fetchtag(this.skillsSet, this.data);
+    this.tagValue.push(this.data);
+    this.skillsSet = '';
+  }
+
+  dropSkill(index: any): any {
+    this.skills.splice(index, 1);
+    this.tagValue.splice(index, 1);
+    this.tagsid.splice(index, 1);
   }
 
   protected loadRelationshipsOptions(): void {

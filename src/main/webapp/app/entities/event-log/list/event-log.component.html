@@ -120,7 +120,8 @@
     </button>
   </div>
   <div class="modal-body" *ngIf="eventLogRef">
-    <form (ngSubmit)="onSubmit(editForm)" #editForm="ngForm">
+    <!-- <form (ngSubmit)="onSubmit(editForm)" #editForm="ngForm"> -->
+    <form #editForm="ngForm">
       <div class="form-group">
         <label for="uuid">UUID</label>
         <div class="input-group">
@@ -158,7 +159,7 @@
 
       <!-- Tags Dropdown -->
 
-      <div class="form-group">
+      <!-- <div class="form-group">
         <label for="field_tags">Tags</label>
         <select class="form-control" id="field_tags" data-cy="tags" multiple name="tags" [ngModel]="eventLogRef.tags">
           <option
@@ -168,12 +169,32 @@
             {{ tagsOption.id }}
           </option>
         </select>
+      </div> -->
+
+      <div class="form-group">
+        <label for="field_tags">Tags</label>
+        <div class="input-group">
+          <input
+            id="field_tags"
+            type="text"
+            class="form-control"
+            placeholder="Enter each Skills Set and hit 'Enter' Key."
+            [(ngModel)]="skillsSet"
+            name="skillsSet"
+            (keydown.enter)="onSkillsSetKeydown()"
+          />
+        </div>
+      </div>
+      <div *ngFor="let skill of skills; let i = index" class="roundedcorner" style="display: inline-block">
+        <button type="button" class="btn btn-outline-primary mr-2" (click)="dropSkill(i)">
+          {{ skill }}<span aria-hidden="true">&times;</span>
+        </button>
       </div>
 
       <!-- Log Book Dropdown -->
 
       <div class="form-group">
-        <label for="field_eventLogBook" ngModel>Event Log Book</label>
+        <label for="field_eventLogBook">Event Log Book</label>
         <select
           class="form-control"
           id="field_eventLogBook"
@@ -192,7 +213,14 @@
       </div>
 
       <div class="modal-footer">
-        <button type="submit" class="btn btn-outline-dark">Save</button>
+        <button
+          type="button"
+          class="btn btn-outline-dark"
+          [disabled]="editForm.invalid || !isInsert || skills.length == 0"
+          (click)="onSubmit(editForm)"
+        >
+          Save
+        </button>
       </div>
     </form>
   </div>
