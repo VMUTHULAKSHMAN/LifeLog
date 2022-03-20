@@ -15,6 +15,7 @@ import { UserService } from 'app/entities/user/user.service';
 import { EventLogBookService } from 'app/entities/event-log-book/service/event-log-book.service';
 import { TagsService } from 'app/entities/tags/service/tags.service';
 import { Router } from '@angular/router';
+import { FormGroup, FormControl } from '@angular/forms';
 
 @Component({
   selector: 'jhi-event-log',
@@ -34,6 +35,11 @@ export class EventLogComponent implements OnInit, OnDestroy {
   orderProp: keyof IEventLog = 'name';
   @Input() event?: IEventLogBook[];
   @Input() eventID: any;
+
+  range = new FormGroup({
+    start: new FormControl(),
+    end: new FormControl(),
+  });
 
   // For Edit Pop up
 
@@ -59,6 +65,9 @@ export class EventLogComponent implements OnInit, OnDestroy {
     this.router.routeReuseStrategy.shouldReuseRoute = function () {
       return false;
     };
+  }
+  ngOnDestroy(): void {
+    throw new Error('Method not implemented.');
   }
 
   loadAll(): void {
@@ -89,6 +98,15 @@ export class EventLogComponent implements OnInit, OnDestroy {
     return item.id!;
   }
 
+  sortdate(): void {
+    const sortData = this.filteredAndSortedEventLogs.length > 0 ? this.filteredAndSortedEventLogs : this.eventLogs;
+    this.filteredAndSortedEventLogs = sortData
+      .filter(
+        eventLog => eventLog.createdDate && eventLog.createdDate >= this.range.value.start && eventLog.createdDate <= this.range.value.end
+      )
+      .sort();
+  }
+
   delete(eventLog: IEventLog): void {
     const modalRef = this.modalService.open(EventLogDeleteDialogComponent, { size: 'xl', backdrop: 'static' });
     modalRef.componentInstance.eventLog = eventLog;
@@ -110,15 +128,15 @@ export class EventLogComponent implements OnInit, OnDestroy {
       .sort();
   }
 
-  ngOnDestroy(): void {
-    console.log('data event');
+  // ngOnDestroy(): void {
+  //   console.log('data event');
 
-    // if (this.reload) {
+  //   if (this.reload) {
 
-    //   this.reload.unsubscribe();
+  //     this.reload.unsubscribe();
 
-    // }
-  }
+  //   }
+  // }
 
   // Clear Button Function
 
